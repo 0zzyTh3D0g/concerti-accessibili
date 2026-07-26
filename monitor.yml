@@ -1,0 +1,84 @@
+name: Monitor Concerti
+
+on:
+  schedule:
+    # ORARI IN UTC. L'Italia in ora legale e' UTC+2, in ora solare UTC+1.
+    # Questi cron coprono: ~07:00, 09:00, 13:00, 15:00, 19:00, 21:00 ora italiana
+    # (2 volte la mattina, 2 il pomeriggio, 2 la sera)
+    - cron: "0 5 * * *"    # 07:00 IT
+    - cron: "0 7 * * *"    # 09:00 IT
+    - cron: "0 11 * * *"   # 13:00 IT
+    - cron: "0 13 * * *"   # 15:00 IT
+    - cron: "0 17 * * *"   # 19:00 IT
+    - cron: "0 19 * * *"   # 21:00 IT
+  workflow_dispatch:        # permette di lanciarlo a mano dal tab Actions
+  push:
+    branches: [main]
+    paths:
+      - "sites.yaml"
+      - "scripts/**"
+      - ".github/workflows/monitor.yml"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: monitor
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    outputs:
+      new_count: ${{ steps.scrape.outputs.new_count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+
+      - name: Scansione siti
+        id: scrape
+        run: python scripts/scraper.py
+
+      - name: Notifica Telegram sui nuovi eventi
+        if: steps.scrape.outputs.new_count != '0'
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PAGES_URL: ${{ vars.PAGES_URL }}
+        run: python scripts/notify.py
+
+      - name: Salva i dati aggiornati
+        run: |
+          git config user.name  "concerti-bot"
+          git config user.email "actions@github.com"
+          git add data docs
+          if git diff --staged --quiet; then
+            echo "Nessuna modifica da salvare."
+          else
+            git commit -m "aggiornamento eventi $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: scan
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
