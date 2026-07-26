@@ -1,0 +1,138 @@
+# =====================================================================
+#  CONFIGURAZIONE SITI DA MONITORARE
+# =====================================================================
+#  Per aggiungere un sito nuovo copia un blocco e cambia i valori.
+#  Campi:
+#    name      -> nome che appare nella pagina web
+#    promoter  -> per raggruppare l'elenco (di solito = name)
+#    url       -> pagina da scansionare
+#    parser    -> "table" | "generic"
+#    richiesta -> testo che spiega COME fare richiesta (mostrato in pagina)
+#    enabled   -> true/false per accendere/spegnere un sito
+# =====================================================================
+
+sites:
+
+  # --- MANI AMICHE: l'hub principale. Gestisce gli accrediti per
+  # --- MC2 Live, Vertigo e molti altri promoter italiani.
+  # --- agenda.php e' una tabella pulita: Data | Concerto | Citta | Palazzetto | Organizzatore | Note
+  - name: "Mani Amiche - Agenda Concerti"
+    promoter: "Mani Amiche ETS"
+    url: "https://www.mani-amiche.it/agenda.php"
+    parser: "table"
+    enabled: true
+    richiesta: >-
+      Cliccare sulla foto dell'artista su mani-amiche.it, scegliere la data
+      e compilare il form con dati anagrafici, certificato ASL ed eventuale
+      necessita' carrozzina. Info: concerti@mani-amiche.it - tel. 392 9345401
+      (10-12 / 16-18).
+    columns:
+      data: 0
+      titolo: 1
+      citta: 2
+      luogo: 3
+      organizzatore: 4
+      note: 5
+
+  # --- Home di Mani Amiche: gli eventi appena aperti compaiono qui
+  - name: "Mani Amiche - Home Concerti"
+    promoter: "Mani Amiche ETS"
+    url: "https://www.mani-amiche.it/home.php"
+    parser: "generic"
+    enabled: true
+    richiesta: >-
+      Form online su mani-amiche.it cliccando sull'artista.
+      Info: concerti@mani-amiche.it - tel. 392 9345401.
+
+  # --- MC2 LIVE (ex mc2luve): procedure accesso disabili
+  - name: "MC2 Live - Accesso disabilita'"
+    promoter: "MC2 Live"
+    url: "https://mc2live.it/procedure-di-accesso-agli-eventi-per-persone-con-disabilita/"
+    parser: "generic"
+    enabled: true
+    richiesta: >-
+      Accrediti gestiti da Mani Amiche Onlus (maniamicheonlus.org).
+      Alcuni eventi hanno contatti email dedicati indicati nella pagina.
+
+  # --- VERTIGO CONCERTI
+  - name: "Vertigo - Modalita' accesso disabili"
+    promoter: "Vertigo Concerti"
+    url: "https://www.vertigo.co.it/faq-items/disabili/"
+    parser: "generic"
+    enabled: true
+    richiesta: >-
+      Accrediti gestiti da Mani Amiche Onlus, salvo eventi specifici
+      elencati in pagina con contatti dedicati.
+      NON acquistare biglietti in autonomia.
+
+  - name: "Vertigo - Tour"
+    promoter: "Vertigo Concerti"
+    url: "https://www.vertigo.co.it/tour/"
+    parser: "generic"
+    enabled: true
+    richiesta: "Vedi pagina FAQ disabili di Vertigo. Accrediti via Mani Amiche."
+
+  # --- PUNTOEACAPO: tabella eventi con email dedicate per artista
+  - name: "Puntoeacapo - Spettatori con disabilita'"
+    promoter: "Puntoeacapo"
+    url: "https://puntoeacapo.uno/spettatori-con-disabilita/"
+    parser: "generic"
+    enabled: true
+    richiesta: >-
+      Email dedicata per artista, indicata nella tabella in pagina
+      (es. servizioclienti@friendsandpartners.it per Ligabue, Pausini,
+      Pinguini Tattici Nucleari, Olly, Achille Lauro).
+
+  # --- FRIENDS & PARTNERS
+  - name: "Friends & Partners - Eventi"
+    promoter: "Friends & Partners"
+    url: "https://www.friendsandpartners.it/eventi"
+    parser: "generic"
+    enabled: true
+    richiesta: >-
+      Modulo di prenotazione accesso persone con disabilita' da inviare a
+      servizioclienti@friendsandpartners.it
+
+  # --- D'ALESSANDRO & GALLI
+  - name: "D'Alessandro & Galli - Eventi"
+    promoter: "D'Alessandro & Galli"
+    url: "https://dalessandroegalli.com/"
+    parser: "generic"
+    enabled: true
+    richiesta: >-
+      Contattare il promoter tramite i riferimenti in pagina evento.
+      Molti eventi passano da Mani Amiche.
+
+  # --- TICKETONE sezione dedicata
+  - name: "TicketOne - Persone con disabilita'"
+    promoter: "TicketOne"
+    url: "https://www.ticketone.it/campaign/diversamente-abili"
+    parser: "generic"
+    enabled: true
+    richiesta: >-
+      Procedura indicata per singolo evento sulla pagina TicketOne dedicata.
+
+# =====================================================================
+#  PAROLE CHIAVE per il parser "generic".
+#  Una riga di testo viene considerata "evento" se contiene una data
+#  riconoscibile OPPURE almeno una di queste keyword insieme a una citta'.
+# =====================================================================
+keywords:
+  - concerto
+  - concerti
+  - tour
+  - live
+  - arena
+  - forum
+  - stadio
+  - palazzetto
+  - teatro
+  - festival
+  - data
+  - date
+
+# Giorni per cui un evento resta segnalato come "NOVITA'" in cima alla pagina
+giorni_in_evidenza: 2
+
+# Timeout richieste HTTP in secondi
+timeout: 30
